@@ -3,9 +3,9 @@
 	"name": "Auto Meta",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Automatically manage metadata for your notes including tags, creation time, modification time, and more.",
-	"author": "Your Name",
-	"authorUrl": "",
-	"fundingUrl": "",
+	"description": "Supercharge your note organization with Auto Meta, an Obsidian plugin that leverages Large Language Models (LLMs) to automatically generate and manage metadata for your notes.",
+	"author": "guildshow",
+	"authorUrl": "https://github.com/guildshow",
+	"fundingUrl": "https://ko-fi.com/guildshow",
 	"isDesktopOnly": false
 }
