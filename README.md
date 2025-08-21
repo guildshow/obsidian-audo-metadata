@@ -1,16 +1,22 @@
-# Auto Meta - Obsidian Plugin
+# Auto Meta - AI-Powered Metadata for Obsidian
 
-A plugin to automatically manage metadata for your Obsidian notes.
+[简体中文](README_cn.md)
 
-## Features
+![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg) ![GitHub version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 
-- 📅 **Auto-add creation time** - Automatically adds a creation timestamp when a new note is created.
-- 🔄 **Auto-update modification time** - Automatically updates the modification timestamp when a note is modified.
-- 🏷️ **Auto-add tags** - Automatically adds preset tags to new notes.
-- ⚙️ **Flexible configuration** - Customize all features through the settings panel.
-- 🎯 **Batch processing** - Supports batch adding metadata to all existing notes.
+Supercharge your note organization with Auto Meta, an Obsidian plugin that leverages Large Language Models (LLMs) to automatically generate and manage metadata for your notes. Say goodbye to manual tagging and categorization.
 
-## Installation
+## ✨ Features
+
+- 🧠 **AI-Powered Metadata Generation** - Automatically generates relevant metadata like tags, categories, and summaries for your notes using powerful LLMs.
+- 🤖 **Intelligent Tagging & Categorization** - Let AI analyze your content and suggest the most relevant tags and categories, ensuring consistent and meaningful organization.
+- 📝 **Automatic Summaries** - Instantly generate concise summaries for your notes, perfect for quick reviews and referencing.
+- ✨ **Custom Metadata Templates** - Define your own metadata structures and instruct the AI to populate them, giving you full control over your metadata.
+- 🔄 **Automatic Timestamps** - Keeps track of your note's creation and last modification dates automatically.
+- 🎯 **Batch Processing** - Update metadata for all your existing notes in one go.
+- ⚙️ **Flexible Configuration** - Easily configure AI settings, and toggle features on or off through a user-friendly settings panel.
+
+## 🚀 Installation
 
 ### Manual Installation
 1. Download the latest version of the plugin files.
@@ -23,7 +29,7 @@ A plugin to automatically manage metadata for your Obsidian notes.
 3. Run `npm run build` to build the plugin.
 4. Enable the plugin in Obsidian.
 
-## Usage
+## 🔧 Usage
 
 ### Automatic Features
 - Configured metadata is automatically added when creating a new note.
@@ -41,7 +47,7 @@ A plugin to automatically manage metadata for your Obsidian notes.
 - **Default tags** - List of default tags (comma-separated).
 - **Date format** - Date format (currently uses ISO format).
 
-## Metadata Format
+## 📝 Metadata Format
 
 The plugin adds YAML front matter to the top of the note:
 
@@ -55,7 +61,7 @@ tags:
 ---
 ```
 
-## Development
+## 💻 Development
 
 ### Development Environment Setup
 ```bash
@@ -74,10 +80,10 @@ npm version patch
 npm run build
 ```
 
-## Contributing
+## ❤️ Contributing
 
 Issues and Pull Requests are welcome!
 
-## License
+## 📜 License
 
 MIT License
