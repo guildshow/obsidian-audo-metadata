@@ -1,0 +1,44 @@
+name: Build and Release Plugin
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build plugin
+      run: npm run build
+
+    - name: Prepare release assets
+      id: prepare_assets
+      run: |
+        # Create a zip file for manual installation
+        cd build
+        zip -r ../plugin.zip .
+        cd ..
+        # Copy main files for automatic updates
+        cp build/main.js .
+        cp build/manifest.json .
+
+    - name: Upload assets to release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          plugin.zip
+          main.js
+          manifest.json
