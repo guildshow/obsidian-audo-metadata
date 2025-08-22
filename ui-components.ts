@@ -32,6 +32,9 @@ export class TemplateSelectModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
+		
+		// 添加CSS类用于居中定位
+		this.modalEl.addClass('template-select-modal');
 
 		// 简洁的标题
 		const titleContainer = contentEl.createDiv('title-container');
@@ -272,8 +275,24 @@ export class TemplateSelectModal extends Modal {
 	private addStyles() {
 		const style = document.createElement('style');
 		style.textContent = `
-			/* 主容器样式 */
-			.modal-container {
+			/* 模态框居中定位 */
+			.modal.template-select-modal {
+				position: fixed !important;
+				left: 50% !important;
+				top: 50% !important;
+				transform: translate(-50%, -50%) !important;
+				max-width: 600px !important;
+				width: 90% !important;
+				max-height: 80vh !important;
+			}
+			
+			.template-select-modal .modal-content {
+				max-height: 100% !important;
+				overflow-y: auto !important;
+			}
+			
+			/* 主容器样式 - 仅针对模板选择模态框 */
+			.template-select-modal .modal-container {
 				max-width: 600px;
 				margin: 0 auto;
 			}
@@ -557,7 +576,7 @@ export class TemplateSelectModal extends Modal {
 				font-weight: 500;
 			}
 			
-			.modal-button-container {
+			.template-select-modal .modal-button-container {
 				display: flex;
 				justify-content: flex-end;
 				gap: 10px;
@@ -602,6 +621,9 @@ export class MetadataPreviewModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
+		
+		// 添加CSS类用于居中定位
+		this.modalEl.addClass('metadata-preview-modal');
 
 		contentEl.createEl('h2', { text: 'Metadata Preview' });
 
@@ -669,6 +691,22 @@ export class MetadataPreviewModal extends Modal {
 	private addStyles() {
 		const style = document.createElement('style');
 		style.textContent = `
+			/* 模态框居中定位 */
+			.modal.metadata-preview-modal {
+				position: fixed !important;
+				left: 50% !important;
+				top: 50% !important;
+				transform: translate(-50%, -50%) !important;
+				max-width: 700px !important;
+				width: 90% !important;
+				max-height: 80vh !important;
+			}
+			
+			.metadata-preview-modal .modal-content {
+				max-height: 100% !important;
+				overflow-y: auto !important;
+			}
+			
 			/* 元数据预览主容器 */
 			.metadata-preview-container {
 				max-width: 700px;
@@ -787,7 +825,7 @@ export class MetadataPreviewModal extends Modal {
 			}
 			
 			/* 按钮容器 */
-			.modal-button-container {
+			.metadata-preview-modal .modal-button-container {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
@@ -808,7 +846,7 @@ export class MetadataPreviewModal extends Modal {
 			}
 			
 			/* 重新设计按钮样式 */
-			.modal-button-container button {
+			.metadata-preview-modal .modal-button-container button {
 				padding: 12px 24px;
 				border-radius: 8px;
 				font-weight: 500;
@@ -820,7 +858,7 @@ export class MetadataPreviewModal extends Modal {
 				overflow: hidden;
 			}
 			
-			.modal-button-container button::before {
+			.metadata-preview-modal .modal-button-container button::before {
 				content: '';
 				position: absolute;
 				top: 0;
@@ -831,35 +869,35 @@ export class MetadataPreviewModal extends Modal {
 				transition: left 0.5s;
 			}
 			
-			.modal-button-container button:hover::before {
+			.metadata-preview-modal .modal-button-container button:hover::before {
 				left: 100%;
 			}
 			
-			.modal-button-container button:hover {
+			.metadata-preview-modal .modal-button-container button:hover {
 				transform: translateY(-2px);
 				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 			}
 			
 			/* 主要操作按钮 */
-			.modal-button-container .mod-cta {
+			.metadata-preview-modal .modal-button-container .mod-cta {
 				background: linear-gradient(135deg, var(--text-accent), var(--text-accent-hover));
 				color: white;
 				font-weight: 600;
 				min-width: 140px;
 			}
 			
-			.modal-button-container .mod-cta:hover {
+			.metadata-preview-modal .modal-button-container .mod-cta:hover {
 				background: linear-gradient(135deg, var(--text-accent-hover), var(--text-accent));
 			}
 			
 			/* 次要按钮 */
-			.modal-button-container button:not(.mod-cta) {
+			.metadata-preview-modal .modal-button-container button:not(.mod-cta) {
 				background: var(--background-secondary);
 				color: var(--text-normal);
 				border: 1px solid var(--background-modifier-border);
 			}
 			
-			.modal-button-container button:not(.mod-cta):hover {
+			.metadata-preview-modal .modal-button-container button:not(.mod-cta):hover {
 				background: var(--background-secondary-alt);
 				border-color: var(--text-accent);
 			}
@@ -879,7 +917,7 @@ export class MetadataPreviewModal extends Modal {
 					min-height: 250px;
 				}
 				
-				.modal-button-container {
+				.metadata-preview-modal .modal-button-container {
 					flex-direction: column;
 					gap: 16px;
 				}
@@ -890,7 +928,7 @@ export class MetadataPreviewModal extends Modal {
 					justify-content: center;
 				}
 				
-				.modal-button-container button {
+				.metadata-preview-modal .modal-button-container button {
 					min-width: 120px;
 					padding: 14px 20px;
 				}
@@ -1003,6 +1041,9 @@ export class TemplateEditModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
+		
+		// 添加CSS类用于居中定位
+		this.modalEl.addClass('template-edit-modal');
 
 		contentEl.createEl('h2', { text: this.isEditing ? 'Edit Template' : 'Create New Template' });
 
@@ -1152,7 +1193,7 @@ category: ""`;
 				margin-bottom: 15px;
 			}
 			
-			.modal-button-container {
+			.template-edit-modal .modal-button-container {
 				display: flex;
 				justify-content: flex-end;
 				gap: 10px;
