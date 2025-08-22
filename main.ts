@@ -15,13 +15,10 @@ export default class AutoMetaPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		// 初始化AI服务和管理器
 		this.aiService = new AIService(this.settings.aiConfig);
 		this.templateManager = new TemplateManager();
 		this.templateManager.loadFromJson(this.settings.templates);
 		this.metadataGenerator = new MetadataGenerator(this.app, this.aiService, this.templateManager);
-
-		// AI生成元数据命令
 		this.addCommand({
 			id: 'ai-generate-metadata',
 			name: 'Generate metadata with AI',
@@ -31,7 +28,6 @@ export default class AutoMetaPlugin extends Plugin {
 			}
 		});
 
-		// 选择模板生成元数据命令
 		this.addCommand({
 			id: 'ai-select-template-generate',
 			name: 'Select template and generate metadata',
@@ -42,12 +38,10 @@ export default class AutoMetaPlugin extends Plugin {
 		});
 
 
-		// 添加设置选项卡
 		this.addSettingTab(new AutoMetaSettingTab(this.app, this));
 	}
 
 	onunload() {
-		console.log('AutoMeta plugin unloaded');
 	}
 
 	async loadSettings() {
@@ -55,13 +49,10 @@ export default class AutoMetaPlugin extends Plugin {
 	}
 
 	async saveSettings() {
-		// 保存模板到设置中
 		if (this.templateManager) {
 			this.settings.templates = this.templateManager.getAllTemplates();
 		}
 		await this.saveData(this.settings);
-		
-		// 更新AI服务配置
 		if (this.aiService) {
 			this.aiService.updateConfig(this.settings.aiConfig);
 		}
@@ -82,20 +73,14 @@ class AutoMetaSettingTab extends PluginSettingTab {
 		containerEl.empty();
 		containerEl.createEl('h1', {text: 'Auto Meta Settings'});
 
-		// AI API 设置区域
 		this.displayAPISettings(containerEl);
-		
-		// 模板管理区域
 		this.displayTemplateSettings(containerEl);
-		
-		// 生成设置区域
 		this.displayGenerationSettings(containerEl);
 	}
 
 	private displayAPISettings(containerEl: HTMLElement): void {
 		containerEl.createEl('h2', {text: 'AI API Configuration'});
 
-		// API Provider
 		new Setting(containerEl)
 			.setName('AI Provider')
 			.setDesc('Select your AI service provider')
@@ -109,7 +94,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		// API Key
 		new Setting(containerEl)
 			.setName('API Key')
 			.setDesc('Your AI service API key')
@@ -121,7 +105,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		// Base URL
 		new Setting(containerEl)
 			.setName('API Base URL')
 			.setDesc('API endpoint URL')
@@ -133,14 +116,12 @@ class AutoMetaSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		// Model
 		const modelSetting = new Setting(containerEl)
 			.setName('AI Model')
 			.setDesc('Select AI model to use for metadata generation');
 		
 		let customInput: TextComponent;
 		
-		// Add dropdown for models
 		modelSetting.addDropdown(dropdown => {
 			const models = this.plugin.aiService.getSupportedModels();
 			dropdown.addOption('', 'Select model...');
@@ -149,7 +130,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 			});
 			dropdown.addOption('custom', 'Custom Model');
 			
-			// Determine current selection
 			const currentModel = this.plugin.settings.aiConfig.model;
 			const isPresetModel = models.some(model => model.id === currentModel);
 			dropdown.setValue(isPresetModel ? currentModel : (currentModel ? 'custom' : ''));
@@ -171,7 +151,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 			});
 		});
 		
-		// Add text input for custom model (initially hidden if preset model is selected)
 		modelSetting.addText(text => {
 			customInput = text;
 			const currentModel = this.plugin.settings.aiConfig.model;
@@ -181,7 +160,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 			text.setPlaceholder('Enter custom model name (e.g., gpt-4-turbo, claude-3.5-sonnet)')
 				.setValue(isPresetModel ? '' : currentModel);
 				
-			// Initially hide if preset model is selected
 			if (isPresetModel) {
 				text.inputEl.style.display = 'none';
 			}
@@ -192,7 +170,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 			});
 		});
 
-		// Test Connection Button
 		new Setting(containerEl)
 			.setName('Test API Connection')
 			.setDesc('Test if your API configuration is working')
@@ -217,7 +194,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 	private displayTemplateSettings(containerEl: HTMLElement): void {
 		containerEl.createEl('h2', {text: 'Template Management'});
 
-		// Default Template
 		new Setting(containerEl)
 			.setName('Default Template')
 			.setDesc('Template to use for auto-generation')
@@ -234,7 +210,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 					});
 			});
 
-		// Template List
 		const templatesContainer = containerEl.createDiv();
 		this.displayTemplateList(templatesContainer);
 	}
@@ -288,7 +263,6 @@ class AutoMetaSettingTab extends PluginSettingTab {
 			}
 		});
 
-		// Add New Template Button
 		new Setting(container)
 			.setName('Create New Template')
 			.addButton(button => button

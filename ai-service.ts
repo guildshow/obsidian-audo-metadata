@@ -162,33 +162,20 @@ Specific requirements:
 ${request.template.aiPrompt}`;
 	}
 
-	/**
-	 * 检测文档语言
-	 */
 	private detectLanguage(content: string): string {
 		const text = content.toLowerCase().replace(/[^\w\s\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\u0100-\u017f\u00c0-\u00ff]/g, '');
-		
-		// 中文字符检测
-		const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
-		
-		// 日文字符检测
-		const japaneseChars = (text.match(/[\u3040-\u309f\u30a0-\u30ff]/g) || []).length;
-		
-		// 韩文字符检测
-		const koreanChars = (text.match(/[\uac00-\ud7af]/g) || []).length;
-		
-		// 俄语字符检测
-		const russianChars = (text.match(/[\u0400-\u04ff]/g) || []).length;
-		
 		const totalChars = text.length;
-		
-		// 优先检测具有独特字符的语言
+
+		const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
+		const japaneseChars = (text.match(/[\u3040-\u309f\u30a0-\u30ff]/g) || []).length;
+		const koreanChars = (text.match(/[\uac00-\ud7af]/g) || []).length;
+		const russianChars = (text.match(/[\u0400-\u04ff]/g) || []).length;
+
 		if (chineseChars / totalChars > 0.1) return 'zh';
 		if (japaneseChars / totalChars > 0.05) return 'ja';
 		if (koreanChars / totalChars > 0.05) return 'ko';
 		if (russianChars / totalChars > 0.1) return 'ru';
-		
-		// 检查常见语言的关键词 - 更精确的词频分析
+
 		const commonWords = {
 			'en': ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'this', 'that', 'is', 'are', 'was', 'were', 'have', 'has'],
 			'zh': ['的', '了', '和', '是', '在', '有', '不', '这', '我', '你', '他', '她'],
@@ -200,33 +187,24 @@ ${request.template.aiPrompt}`;
 			'it': ['il', 'la', 'lo', 'gli', 'le', 'di', 'del', 'della', 'che', 'e', 'ed', 'un', 'una', 'per', 'non', 'in', 'si', 'con', 'essere', 'avere'],
 			'ru': ['и', 'в', 'не', 'на', 'я', 'быть', 'он', 'с', 'как', 'что', 'это', 'вы']
 		};
-		
-		// 计算词频得分，使用更精确的匹配方法
+
 		let maxScore = 0;
 		let detectedLang = 'en';
-		
+
 		for (const [lang, words] of Object.entries(commonWords)) {
 			let score = 0;
 			for (const word of words) {
-				// 使用词边界匹配，避免部分匹配的误判
 				const regex = new RegExp(`\\b${word}\\b`, 'g');
 				const matches = text.match(regex);
 				if (matches) {
 					score += matches.length;
 				}
 			}
-			
-			// 对于英语，增加额外的验证
+
 			if (lang === 'en' && score > 0) {
-				// 检查英语特有的常见词汇模式
 				const englishPatterns = [
-					/\bthe\s+\w+/g,  // the + 单词
-					/\band\s+\w+/g,   // and + 单词
-					/\bof\s+\w+/g,    // of + 单词
-					/\bin\s+\w+/g,    // in + 单词
-					/\bto\s+\w+/g     // to + 单词
+					/\bthe\s+\w+/g, /\band\s+\w+/g, /\bof\s+\w+/g, /\bin\s+\w+/g, /\bto\s+\w+/g
 				];
-				
 				let patternScore = 0;
 				for (const pattern of englishPatterns) {
 					const matches = text.match(pattern);
@@ -234,36 +212,28 @@ ${request.template.aiPrompt}`;
 						patternScore += matches.length;
 					}
 				}
-				score += patternScore * 2; // 给英语模式更高权重
+				score += patternScore * 2;
 			}
-			
+
 			if (score > maxScore) {
 				maxScore = score;
 				detectedLang = lang;
 			}
 		}
-		
-		// 如果没有明确的词频优势，再进行特征字符检测，但提高阈值
+
 		if (maxScore < 3) {
-			// 法语特征字符检测 - 提高阈值
 			const frenchChars = (text.match(/[àâäçéèêëïîôöùûüÿ]/g) || []).length;
-			
-			// 德语特征字符检测 - 提高阈值 
 			const germanChars = (text.match(/[äöüß]/g) || []).length;
-			
-			// 西班牙语特征字符检测 - 提高阈值
 			const spanishChars = (text.match(/[ñáéíóúü]/g) || []).length;
-			
-			// 意大利语特征字符检测 - 提高阈值并增加更多特征检测
 			const italianChars = (text.match(/[àèéìíîòóù]/g) || []).length;
 			const italianDoubleConsonants = (text.match(/[bcdfglmnpqrstvz]{2}/g) || []).length;
-			
+
 			if (frenchChars / totalChars > 0.05) return 'fr';
 			if (germanChars / totalChars > 0.04) return 'de';
 			if (spanishChars / totalChars > 0.04) return 'es';
 			if ((italianChars / totalChars > 0.05) || (italianDoubleConsonants / totalChars > 0.02)) return 'it';
 		}
-		
+
 		return detectedLang;
 	}
 
@@ -496,31 +466,21 @@ ${request.template.aiPrompt}`;
 		}
 	}
 
-	/**
-	 * 格式化标签以确保 Obsidian 兼容性
-	 */
 	private formatTagsForObsidian(metadata: string): string {
-		let result = metadata;
-		
-		// 处理 YAML 数组格式的标签 (tags: [])
-		result = result.replace(/tags:\s*\[([\s\S]*?)\]/gm, (match, tagsContent) => {
-			const formattedTagsContent = tagsContent.replace(/["']([^"'\n]*?)["']/g, (tagMatch: string, tagValue: string) => {
-				const formattedTag = this.formatSingleTag(tagValue);
-				return formattedTag ? `"${formattedTag}"` : tagMatch;
+		return metadata
+			.replace(/tags:\s*\[([\s\S]*?)\]/gm, (match, tagsContent) => {
+				const formattedTagsContent = tagsContent.replace(/["']([^"'\n]*?)["']/g, (tagMatch: string, tagValue: string) => {
+					const formattedTag = this.formatSingleTag(tagValue);
+					return formattedTag ? `"${formattedTag}"` : tagMatch;
+				});
+				return `tags: [${formattedTagsContent}]`;
+			})
+			.replace(/tags:\s*\n(\s*-\s*[^\n]*\n?)*/gm, (match) => {
+				return match.replace(/(\s*-\s*)["']([^"'\n]+?)["'](\n?)/g, (tagMatch, prefix, tagValue, suffix) => {
+					const formattedTag = this.formatSingleTag(tagValue);
+					return formattedTag ? `${prefix}"${formattedTag}"${suffix}` : tagMatch;
+				});
 			});
-			return `tags: [${formattedTagsContent}]`;
-		});
-		
-		// 处理 YAML 列表格式的标签 (tags: \n - item)
-		result = result.replace(/tags:\s*\n(\s*-\s*[^\n]*\n?)*/gm, (match) => {
-			const formattedMatch = match.replace(/(\s*-\s*)["']([^"'\n]+?)["'](\n?)/g, (tagMatch, prefix, tagValue, suffix) => {
-				const formattedTag = this.formatSingleTag(tagValue);
-				return formattedTag ? `${prefix}"${formattedTag}"${suffix}` : tagMatch;
-			});
-			return formattedMatch;
-		});
-		
-		return result;
 	}
 
 	/**
@@ -581,11 +541,7 @@ ${request.template.aiPrompt}`;
 		];
 	}
 
-	/**
-	 * 估算token使用量
-	 */
 	estimateTokens(text: string): number {
-		// Simple token estimation: Chinese characters count as 2 tokens, English words count as 1 token each
 		const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
 		const englishWords = text.replace(/[\u4e00-\u9fff]/g, '').split(/\s+/).filter(word => word.length > 0).length;
 		return chineseChars * 2 + englishWords;

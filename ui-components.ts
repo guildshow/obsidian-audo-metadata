@@ -22,10 +22,9 @@ export class TemplateSelectModal extends Modal {
 		this.templates = templates;
 		this.onSelect = onSelect;
 		this.onCancel = onCancel;
-		// 默认选择 general note 模板
-		this.selectedIndex = this.templates.findIndex(t => t.template.id === 'general-note');
+			this.selectedIndex = this.templates.findIndex(t => t.template.id === 'general-note');
 		if (this.selectedIndex === -1 && this.templates.length > 0) {
-			this.selectedIndex = 0; // 如果没找到 general note，选择第一个
+			this.selectedIndex = 0;
 		}
 	}
 
@@ -33,10 +32,8 @@ export class TemplateSelectModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 		
-		// 添加CSS类用于居中定位
 		this.modalEl.addClass('template-select-modal');
 
-		// 简洁的标题
 		const titleContainer = contentEl.createDiv('title-container');
 		const titleEl = titleContainer.createEl('h2', { 
 			text: 'Select Template',
@@ -55,10 +52,7 @@ export class TemplateSelectModal extends Modal {
 			return;
 		}
 
-		// 创建优化的模板列表
 		this.createOptimizedTemplateList(contentEl, this.templates);
-
-		// 底部按钮
 		const buttonContainer = contentEl.createDiv('modal-actions');
 		new ButtonComponent(buttonContainer)
 			.setButtonText('Cancel')
@@ -79,15 +73,11 @@ export class TemplateSelectModal extends Modal {
 			const { template, confidence } = templateOption;
 			const cardEl = listContainer.createDiv('template-card');
 			
-			// 添加data属性用于键盘导航
 			cardEl.setAttribute('data-template-index', index.toString());
-			
-			// 添加选中状态样式
 			if (index === this.selectedIndex) {
 				cardEl.addClass('template-selected');
 			}
 			
-			// 模板图标和名称
 			const headerEl = cardEl.createDiv('template-header');
 			const iconEl = headerEl.createEl('div', { cls: 'template-icon' });
 			iconEl.textContent = this.getTemplateIcon(template.id);
@@ -103,7 +93,6 @@ export class TemplateSelectModal extends Modal {
 				cls: 'template-desc'
 			});
 
-			// 推荐标识
 			if (confidence && confidence > 0.7) {
 				const badgeEl = cardEl.createEl('div', { 
 					text: 'Recommended',
@@ -111,7 +100,6 @@ export class TemplateSelectModal extends Modal {
 				});
 			}
 			
-			// 默认选中标识
 			if (index === this.selectedIndex) {
 				const selectedBadgeEl = cardEl.createEl('div', { 
 					text: 'Selected',
@@ -119,12 +107,10 @@ export class TemplateSelectModal extends Modal {
 				});
 			}
 
-			// 点击选择
 			cardEl.addEventListener('click', () => {
 				this.selectTemplate(index);
 			});
 
-			// 键盘快捷键提示
 			if (index < 2) {
 				const shortcutEl = cardEl.createEl('div', {
 					text: `${index + 1}`,
@@ -133,7 +119,6 @@ export class TemplateSelectModal extends Modal {
 			}
 		});
 
-		// 添加键盘事件监听
 		this.addKeyboardNavigation(templates);
 	}
 
@@ -223,54 +208,6 @@ export class TemplateSelectModal extends Modal {
 		}
 	}
 
-	private createTemplateList(container: HTMLElement, templates: TemplateSelectOption[], showConfidence: boolean) {
-		const listContainer = container.createDiv('template-list');
-
-		templates.forEach(templateOption => {
-			const { template, confidence, reason } = templateOption;
-			const itemEl = listContainer.createDiv('template-item');
-			
-			// 模板标题
-			const titleEl = itemEl.createEl('h4', { text: template.name });
-			if (showConfidence && confidence && confidence > 0.7) {
-				titleEl.addClass('recommended-template');
-			}
-
-			// 模板描述
-			itemEl.createEl('p', { 
-				text: template.description,
-				cls: 'template-description'
-			});
-
-			// 推荐理由和置信度
-			if (showConfidence && (confidence || reason)) {
-				const metaEl = itemEl.createDiv('template-meta');
-				if (reason) {
-					metaEl.createEl('span', { 
-						text: `Reason: ${reason}`,
-						cls: 'template-reason'
-					});
-				}
-				if (confidence) {
-					metaEl.createEl('span', { 
-						text: `Match: ${Math.round(confidence * 100)}%`,
-						cls: 'template-confidence'
-					});
-				}
-			}
-
-			// 选择按钮
-			const selectButton = new ButtonComponent(itemEl)
-				.setButtonText('Select Template')
-				.setCta()
-				.onClick(() => {
-					this.close();
-					this.onSelect(template);
-				});
-
-			itemEl.appendChild(selectButton.buttonEl);
-		});
-	}
 
 	private addStyles() {
 		const style = document.createElement('style');
@@ -627,12 +564,9 @@ export class MetadataPreviewModal extends Modal {
 
 		contentEl.createEl('h2', { text: 'Metadata Preview' });
 
-		// 文件信息
 		const infoEl = contentEl.createDiv('file-info');
 		infoEl.createEl('p', { text: `File: ${this.fileName}` });
 		infoEl.createEl('p', { text: `Template: ${this.template.name}` });
-
-		// 元数据编辑区域
 		const metadataHeader = contentEl.createDiv('metadata-header');
 		metadataHeader.createEl('h3', { text: 'Generated Metadata:' });
 		const keyboardHint = metadataHeader.createEl('p', {
@@ -683,8 +617,6 @@ export class MetadataPreviewModal extends Modal {
 
 		// 添加键盘事件处理
 		this.addKeyboardNavigation();
-
-		// 添加样式
 		this.addStyles();
 	}
 
@@ -974,9 +906,7 @@ export class MetadataPreviewModal extends Modal {
 
 	private addKeyboardNavigation() {
 		this.keyboardHandler = (e: KeyboardEvent) => {
-			// 检查是否在textarea中编辑
 			if (document.activeElement === this.textareaEl) {
-				// 在textarea中，只处理Ctrl+Enter和Escape
 				if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
 					e.preventDefault();
 					const editedMetadata = this.textareaEl!.value;
@@ -988,7 +918,6 @@ export class MetadataPreviewModal extends Modal {
 					this.onCancel?.();
 				}
 			} else {
-				// 不在textarea中，处理全局快捷键
 				if (e.key === 'Enter') {
 					e.preventDefault();
 					const editedMetadata = this.textareaEl!.value;
@@ -1009,7 +938,6 @@ export class MetadataPreviewModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 		
-		// 清理键盘事件监听器
 		if (this.keyboardHandler) {
 			document.removeEventListener('keydown', this.keyboardHandler);
 		}

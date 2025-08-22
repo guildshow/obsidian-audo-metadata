@@ -17,23 +17,14 @@ export class TemplateManager {
 		});
 	}
 
-	/**
-	 * 获取所有模板
-	 */
 	getAllTemplates(): MetadataTemplate[] {
 		return Array.from(this.templates.values());
 	}
 
-	/**
-	 * 获取用户自定义模板
-	 */
 	getCustomTemplates(): MetadataTemplate[] {
 		return Array.from(this.templates.values()).filter(t => !t.isBuiltIn);
 	}
 
-	/**
-	 * 获取内置模板
-	 */
 	getBuiltInTemplates(): MetadataTemplate[] {
 		return Array.from(this.templates.values()).filter(t => t.isBuiltIn);
 	}
@@ -212,20 +203,14 @@ export class TemplateManager {
 		return errors;
 	}
 
-	/**
-	 * 从JSON加载模板（用于设置导入）
-	 */
 	loadFromJson(templatesData: MetadataTemplate[]): void {
-		// 清除现有的自定义模板
 		const builtInTemplates = this.getBuiltInTemplates();
 		this.templates.clear();
 		
-		// 重新添加内置模板
 		builtInTemplates.forEach(template => {
 			this.templates.set(template.id, template);
 		});
 
-		// 添加导入的模板
 		templatesData.forEach(template => {
 			if (!template.isBuiltIn) {
 				this.templates.set(template.id, template);
@@ -233,9 +218,6 @@ export class TemplateManager {
 		});
 	}
 
-	/**
-	 * 导出为JSON（用于设置导出）
-	 */
 	exportToJson(): MetadataTemplate[] {
 		return this.getAllTemplates();
 	}
@@ -247,51 +229,23 @@ export class TemplateManager {
 		return `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 	}
 
-	/**
-	 * 检测学术关键词
-	 */
 	private containsAcademicKeywords(content: string): boolean {
-		const academicKeywords = [
-			'abstract', '摘要', 'introduction', '引言', 'methodology', '方法',
-			'results', '结果', 'conclusion', '结论', 'references', '参考文献',
-			'doi', 'arxiv', 'journal', 'conference', '论文', '研究'
-		];
-		return academicKeywords.some(keyword => content.includes(keyword));
+		const keywords = ['abstract', '摘要', 'introduction', '引言', 'methodology', '方法', 'results', '结果', 'conclusion', '结论', 'references', '参考文献', 'doi', 'arxiv', 'journal', 'conference', '论文', '研究'];
+		return keywords.some(keyword => content.includes(keyword));
 	}
 
-	/**
-	 * 检测会议关键词
-	 */
 	private containsMeetingKeywords(content: string): boolean {
-		const meetingKeywords = [
-			'meeting', '会议', 'agenda', '议程', 'attendees', '参与者',
-			'minutes', '会议纪要', 'action items', '行动项', 'discussion', '讨论',
-			'decision', '决定', 'next steps', '下一步', '参会人员'
-		];
-		return meetingKeywords.some(keyword => content.includes(keyword));
+		const keywords = ['meeting', '会议', 'agenda', '议程', 'attendees', '参与者', 'minutes', '会议纪要', 'action items', '行动项', 'discussion', '讨论', 'decision', '决定', 'next steps', '下一步', '参会人员'];
+		return keywords.some(keyword => content.includes(keyword));
 	}
 
-	/**
-	 * 检测读书关键词
-	 */
 	private containsBookKeywords(content: string): boolean {
-		const bookKeywords = [
-			'chapter', '章节', 'author', '作者', 'book', '书籍',
-			'reading', '阅读', 'summary', '总结', 'notes', '笔记',
-			'quote', '引用', 'review', '评论', 'isbn', 'publisher', '出版社'
-		];
-		return bookKeywords.some(keyword => content.includes(keyword));
+		const keywords = ['chapter', '章节', 'author', '作者', 'book', '书籍', 'reading', '阅读', 'summary', '总结', 'notes', '笔记', 'quote', '引用', 'review', '评论', 'isbn', 'publisher', '出版社'];
+		return keywords.some(keyword => content.includes(keyword));
 	}
 
-	/**
-	 * 检测项目关键词
-	 */
 	private containsProjectKeywords(content: string): boolean {
-		const projectKeywords = [
-			'project', '项目', 'requirements', '需求', 'timeline', '时间线',
-			'deliverable', '交付物', 'milestone', '里程碑', 'specification', '规范',
-			'architecture', '架构', 'implementation', '实现', 'version', '版本'
-		];
-		return projectKeywords.some(keyword => content.includes(keyword));
+		const keywords = ['project', '项目', 'requirements', '需求', 'timeline', '时间线', 'deliverable', '交付物', 'milestone', '里程碑', 'specification', '规范', 'architecture', '架构', 'implementation', '实现', 'version', '版本'];
+		return keywords.some(keyword => content.includes(keyword));
 	}
 }

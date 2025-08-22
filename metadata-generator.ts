@@ -25,9 +25,6 @@ export class MetadataGenerator {
 		};
 	}
 
-	/**
-	 * 为当前活动文档生成元数据
-	 */
 	async generateForCurrentFile(autoSelectTemplate: boolean = true, previewBeforeInsert: boolean = true): Promise<void> {
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView || !activeView.file) {
@@ -38,9 +35,6 @@ export class MetadataGenerator {
 		await this.generateForFile(activeView.file, autoSelectTemplate, previewBeforeInsert);
 	}
 
-	/**
-	 * 为指定文件生成元数据
-	 */
 	async generateForFile(file: TFile, autoSelectTemplate: boolean = true, previewBeforeInsert: boolean = true): Promise<void> {
 		try {
 			// 读取文件内容
@@ -72,9 +66,6 @@ export class MetadataGenerator {
 		}
 	}
 
-	/**
-	 * 使用指定模板生成元数据
-	 */
 	async generateWithTemplate(
 		file: TFile, 
 		template: MetadataTemplate, 
@@ -82,11 +73,9 @@ export class MetadataGenerator {
 		previewBeforeInsert: boolean = true
 	): Promise<void> {
 		const startTime = Date.now();
-		let loadingNotice: Notice | undefined;
+		const loadingNotice = new Notice('Generating metadata...', 0);
 
 		try {
-			// 显示加载提示
-			loadingNotice = new Notice('Generating metadata...', 0);
 
 			// 获取现有元数据（如果有的话）
 			const existingMetadata = await this.extractExistingMetadata(file);
@@ -102,8 +91,7 @@ export class MetadataGenerator {
 			// 调用AI生成元数据
 			const response = await this.aiService.generateMetadata(request);
 
-			// 隐藏加载提示
-			loadingNotice?.hide();
+			loadingNotice.hide();
 
 			if (!response.success || !response.metadata) {
 				throw new Error(response.error || 'Generation failed');
@@ -121,15 +109,12 @@ export class MetadataGenerator {
 			}
 
 		} catch (error) {
-			loadingNotice?.hide();
+			loadingNotice.hide();
 			this.usageStats.failedRequests++;
 			throw error;
 		}
 	}
 
-	/**
-	 * 显示模板选择界面
-	 */
 	private showTemplateSelection(file: TFile, documentContent: string, previewBeforeInsert: boolean): void {
 		const suggestions = this.templateManager.suggestTemplates(documentContent, file.name);
 		const allTemplates = this.templateManager.getAllTemplates().map(template => ({
@@ -149,9 +134,6 @@ export class MetadataGenerator {
 		modal.open();
 	}
 
-	/**
-	 * 显示元数据预览
-	 */
 	private showMetadataPreview(file: TFile, metadata: string, template: MetadataTemplate): void {
 		const modal = new MetadataPreviewModal(
 			this.app,
@@ -172,9 +154,6 @@ export class MetadataGenerator {
 		modal.open();
 	}
 
-	/**
-	 * 将元数据插入到文件中
-	 */
 	async insertMetadata(file: TFile, metadata: string, replaceExisting: boolean = false): Promise<void> {
 		const content = await this.app.vault.read(file);
 		let newContent: string;
@@ -204,9 +183,6 @@ export class MetadataGenerator {
 		await this.app.vault.modify(file, newContent);
 	}
 
-	/**
-	 * 合并元数据
-	 */
 	private mergeMetadata(existing: string, newMetadata: string): string {
 		const existingLines = existing.split('\n').filter(line => line.trim());
 		const newLines = newMetadata.split('\n').filter(line => line.trim());
@@ -242,9 +218,6 @@ export class MetadataGenerator {
 		return result.join('\n');
 	}
 
-	/**
-	 * 提取文档正文内容（去除现有的元数据）
-	 */
 	private extractDocumentContent(content: string): string {
 		if (content.startsWith('---')) {
 			const endIndex = content.indexOf('---', 3);
@@ -255,9 +228,6 @@ export class MetadataGenerator {
 		return content.trim();
 	}
 
-	/**
-	 * 提取现有元数据
-	 */
 	private async extractExistingMetadata(file: TFile): Promise<string | undefined> {
 		const content = await this.app.vault.read(file);
 		
@@ -271,9 +241,6 @@ export class MetadataGenerator {
 		return undefined;
 	}
 
-	/**
-	 * 批量处理文件
-	 */
 	async batchGenerate(
 		files: TFile[], 
 		templateId: string, 
@@ -335,9 +302,6 @@ export class MetadataGenerator {
 		return results;
 	}
 
-	/**
-	 * 更新使用统计
-	 */
 	private updateUsageStats(response: MetadataGenerationResponse, processingTime: number): void {
 		this.usageStats.totalRequests++;
 		
@@ -359,16 +323,10 @@ export class MetadataGenerator {
 		this.usageStats.lastUsed = new Date();
 	}
 
-	/**
-	 * 获取使用统计
-	 */
 	getUsageStats(): UsageStats {
 		return { ...this.usageStats };
 	}
 
-	/**
-	 * 重置使用统计
-	 */
 	resetUsageStats(): void {
 		this.usageStats = {
 			totalRequests: 0,
@@ -381,14 +339,9 @@ export class MetadataGenerator {
 		};
 	}
 
-	/**
-	 * 估算文档处理成本
-	 */
 	estimateCost(content: string): { tokens: number; estimatedCost: number } {
 		const tokens = this.aiService.estimateTokens(content);
-		// 基于 GPT-3.5-turbo 的定价估算 ($0.002/1K tokens)
 		const estimatedCost = (tokens / 1000) * 0.002;
-		
 		return { tokens, estimatedCost };
 	}
 }
