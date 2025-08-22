@@ -177,57 +177,91 @@ ${request.template.aiPrompt}`;
 		// 韩文字符检测
 		const koreanChars = (text.match(/[\uac00-\ud7af]/g) || []).length;
 		
-		// 法语特征字符检测
-		const frenchChars = (text.match(/[àâäçéèêëïîôöùûüÿ]/g) || []).length;
-		
-		// 德语特征字符检测
-		const germanChars = (text.match(/[äöüß]/g) || []).length;
-		
-		// 西班牙语特征字符检测
-		const spanishChars = (text.match(/[ñáéíóúü]/g) || []).length;
-		
-		// 意大利语特征字符检测
-		const italianChars = (text.match(/[àèéìíîòóù]/g) || []).length;
-		
 		// 俄语字符检测
 		const russianChars = (text.match(/[\u0400-\u04ff]/g) || []).length;
 		
 		const totalChars = text.length;
 		
+		// 优先检测具有独特字符的语言
 		if (chineseChars / totalChars > 0.1) return 'zh';
 		if (japaneseChars / totalChars > 0.05) return 'ja';
 		if (koreanChars / totalChars > 0.05) return 'ko';
 		if (russianChars / totalChars > 0.1) return 'ru';
-		if (frenchChars / totalChars > 0.02) return 'fr';
-		if (germanChars / totalChars > 0.02) return 'de';
-		if (spanishChars / totalChars > 0.02) return 'es';
-		if (italianChars / totalChars > 0.02) return 'it';
 		
-		// 检查常见语言的关键词
+		// 检查常见语言的关键词 - 更精确的词频分析
 		const commonWords = {
-			'en': ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'],
+			'en': ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'this', 'that', 'is', 'are', 'was', 'were', 'have', 'has'],
 			'zh': ['的', '了', '和', '是', '在', '有', '不', '这', '我', '你', '他', '她'],
 			'ja': ['です', 'である', 'として', 'について', 'から', 'まで', 'では', 'より'],
 			'ko': ['이다', '있다', '없다', '하다', '되다', '같다', '많다', '좋다'],
-			'fr': ['le', 'de', 'et', 'un', 'il', 'être', 'et', 'en', 'avoir', 'que', 'pour'],
-			'de': ['der', 'die', 'und', 'in', 'den', 'von', 'zu', 'das', 'mit', 'sich', 'des', 'auf'],
-			'es': ['el', 'la', 'de', 'que', 'y', 'a', 'en', 'un', 'ser', 'se', 'no', 'te'],
-			'it': ['il', 'di', 'che', 'e', 'la', 'un', 'a', 'per', 'non', 'in', 'una', 'si'],
+			'fr': ['le', 'la', 'les', 'de', 'des', 'du', 'et', 'un', 'une', 'il', 'elle', 'être', 'avoir', 'que', 'pour', 'avec', 'sur', 'dans'],
+			'de': ['der', 'die', 'das', 'und', 'in', 'den', 'von', 'zu', 'mit', 'sich', 'auf', 'ist', 'sind', 'war', 'waren', 'haben', 'hat'],
+			'es': ['el', 'la', 'los', 'las', 'de', 'del', 'que', 'y', 'a', 'en', 'un', 'una', 'ser', 'estar', 'se', 'no', 'te', 'con', 'por'],
+			'it': ['il', 'la', 'lo', 'gli', 'le', 'di', 'del', 'della', 'che', 'e', 'ed', 'un', 'una', 'per', 'non', 'in', 'si', 'con', 'essere', 'avere'],
 			'ru': ['и', 'в', 'не', 'на', 'я', 'быть', 'он', 'с', 'как', 'что', 'это', 'вы']
 		};
 		
+		// 计算词频得分，使用更精确的匹配方法
 		let maxScore = 0;
 		let detectedLang = 'en';
 		
 		for (const [lang, words] of Object.entries(commonWords)) {
-			const score = words.reduce((count, word) => {
-				return count + (text.split(word).length - 1);
-			}, 0);
+			let score = 0;
+			for (const word of words) {
+				// 使用词边界匹配，避免部分匹配的误判
+				const regex = new RegExp(`\\b${word}\\b`, 'g');
+				const matches = text.match(regex);
+				if (matches) {
+					score += matches.length;
+				}
+			}
+			
+			// 对于英语，增加额外的验证
+			if (lang === 'en' && score > 0) {
+				// 检查英语特有的常见词汇模式
+				const englishPatterns = [
+					/\bthe\s+\w+/g,  // the + 单词
+					/\band\s+\w+/g,   // and + 单词
+					/\bof\s+\w+/g,    // of + 单词
+					/\bin\s+\w+/g,    // in + 单词
+					/\bto\s+\w+/g     // to + 单词
+				];
+				
+				let patternScore = 0;
+				for (const pattern of englishPatterns) {
+					const matches = text.match(pattern);
+					if (matches) {
+						patternScore += matches.length;
+					}
+				}
+				score += patternScore * 2; // 给英语模式更高权重
+			}
 			
 			if (score > maxScore) {
 				maxScore = score;
 				detectedLang = lang;
 			}
+		}
+		
+		// 如果没有明确的词频优势，再进行特征字符检测，但提高阈值
+		if (maxScore < 3) {
+			// 法语特征字符检测 - 提高阈值
+			const frenchChars = (text.match(/[àâäçéèêëïîôöùûüÿ]/g) || []).length;
+			
+			// 德语特征字符检测 - 提高阈值 
+			const germanChars = (text.match(/[äöüß]/g) || []).length;
+			
+			// 西班牙语特征字符检测 - 提高阈值
+			const spanishChars = (text.match(/[ñáéíóúü]/g) || []).length;
+			
+			// 意大利语特征字符检测 - 提高阈值并增加更多特征检测
+			const italianChars = (text.match(/[àèéìíîòóù]/g) || []).length;
+			const italianDoubleConsonants = (text.match(/[bcdfglmnpqrstvz]{2}/g) || []).length;
+			
+			if (frenchChars / totalChars > 0.05) return 'fr';
+			if (germanChars / totalChars > 0.04) return 'de';
+			if (spanishChars / totalChars > 0.04) return 'es';
+			if ((italianChars / totalChars > 0.05) || (italianDoubleConsonants / totalChars > 0.02)) return 'it';
 		}
 		
 		return detectedLang;
@@ -240,7 +274,7 @@ ${request.template.aiPrompt}`;
 		const prompts = {
 			'zh': {
 				systemRole: '你是一个专业的文档元数据生成助手。请根据用户提供的文档内容和模板要求，生成准确、有用的YAML格式元数据。',
-				languageInstruction: '使用中文生成标题、摘要、标签等内容。标签必须使用小写字母，多个单词之间用连字符(-)连接，例如："机器学习"应写成"machine-learning"'
+				languageInstruction: '标题使用英文生成（小写字母，多个单词用连字符连接）。摘要和其他内容使用中文生成。标签优先使用中文，但专有名词（如技术术语、品牌名等）可保留英文。中文标签示例："机器学习"、"数据分析"、"项目管理"；英文专有名词示例："python"、"docker"、"api"'
 			},
 			'en': {
 				systemRole: 'You are a professional document metadata generation assistant. Please generate accurate and useful YAML format metadata based on the document content and template requirements provided by the user.',
@@ -512,15 +546,22 @@ ${request.template.aiPrompt}`;
 		
 		let formattedTag = tagValue.trim();
 		
-		// 转换为小写
-		formattedTag = formattedTag.toLowerCase();
+		// 检查是否包含中文字符
+		const hasChinese = /[\u4e00-\u9fff]/.test(formattedTag);
 		
-		// 替换空格和其他分隔符为连字符
-		formattedTag = formattedTag
-			.replace(/[\s_]+/g, '-')  // 将空格和下划线替换为连字符
-			.replace(/[^\w\-\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g, '-')  // 保留字母数字和中日韩字符，其他字符替换为连字符
-			.replace(/-+/g, '-')  // 将多个连续连字符替换为单个连字符
-			.replace(/^-|-$/g, '');  // 移除开头和结尾的连字符
+		if (hasChinese) {
+			// 中文标签：不转换大小写，只处理空格和特殊字符
+			formattedTag = formattedTag
+				.replace(/[\s_]+/g, '')  // 移除空格和下划线
+				.replace(/[^\w\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g, '');  // 只保留字母数字和中日韩字符
+		} else {
+			// 英文标签：转换为小写并用连字符连接
+			formattedTag = formattedTag.toLowerCase()
+				.replace(/[\s_]+/g, '-')  // 将空格和下划线替换为连字符
+				.replace(/[^\w\-]/g, '-')  // 其他字符替换为连字符
+				.replace(/-+/g, '-')  // 将多个连续连字符替换为单个连字符
+				.replace(/^-|-$/g, '');  // 移除开头和结尾的连字符
+		}
 		
 		return formattedTag;
 	}
