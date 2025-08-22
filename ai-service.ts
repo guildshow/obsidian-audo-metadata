@@ -147,9 +147,11 @@ Requirements:
 2. Ensure the generated content accurately reflects the document content
 3. ${languagePrompt.languageInstruction}
 4. Use date format: ${currentDate}
-5. Tags should be specific and useful, avoid being too broad
-6. Only return YAML format metadata, do not include other content
-7. Do not include YAML separators (---)
+5. IMPORTANT: Title must use lowercase letters and connect multiple words with hyphens (-). For example: "machine-learning-guide", "project-management-notes"
+6. IMPORTANT: All tags must be formatted for Obsidian compatibility - use lowercase letters and connect multiple words with hyphens (-). For example: "machine-learning", "project-management", "data-science"
+7. Tags should be specific and useful, avoid being too broad
+8. Only return YAML format metadata, do not include other content
+9. Do not include YAML separators (---)
 
 Template structure:
 \`\`\`yaml
@@ -238,39 +240,39 @@ ${request.template.aiPrompt}`;
 		const prompts = {
 			'zh': {
 				systemRole: '你是一个专业的文档元数据生成助手。请根据用户提供的文档内容和模板要求，生成准确、有用的YAML格式元数据。',
-				languageInstruction: '使用中文生成标题、摘要、标签等内容'
+				languageInstruction: '使用中文生成标题、摘要、标签等内容。标签必须使用小写字母，多个单词之间用连字符(-)连接，例如："机器学习"应写成"machine-learning"'
 			},
 			'en': {
 				systemRole: 'You are a professional document metadata generation assistant. Please generate accurate and useful YAML format metadata based on the document content and template requirements provided by the user.',
-				languageInstruction: 'Generate titles, summaries, tags and other content in English'
+				languageInstruction: 'Generate titles, summaries, tags and other content in English. Tags must use lowercase letters with hyphens (-) connecting multiple words'
 			},
 			'ja': {
 				systemRole: 'あなたは文書メタデータ生成の専門アシスタントです。ユーザーが提供する文書内容とテンプレート要件に基づいて、正確で有用なYAML形式のメタデータを生成してください。',
-				languageInstruction: '日本語でタイトル、要約、タグなどのコンテンツを生成する'
+				languageInstruction: '日本語でタイトル、要約、タグなどのコンテンツを生成する。タグは小文字とハイフン(-)で複数の単語を接続する形式を使用してください'
 			},
 			'ko': {
 				systemRole: '당신은 전문 문서 메타데이터 생성 도우미입니다. 사용자가 제공하는 문서 내용과 템플릿 요구사항을 바탕으로 정확하고 유용한 YAML 형식의 메타데이터를 생성해 주세요.',
-				languageInstruction: '한국어로 제목, 요약, 태그 등의 콘텐츠 생성'
+				languageInstruction: '한국어로 제목, 요약, 태그 등의 콘텐츠 생성. 태그는 소문자와 하이픈(-)을 사용하여 여러 단어를 연결하는 형식을 사용하세요'
 			},
 			'fr': {
 				systemRole: 'Vous êtes un assistant professionnel de génération de métadonnées de documents. Veuillez générer des métadonnées au format YAML précises et utiles basées sur le contenu du document et les exigences du modèle fournis par l\'utilisateur.',
-				languageInstruction: 'Générer les titres, résumés, balises et autres contenus en français'
+				languageInstruction: 'Générer les titres, résumés, balises et autres contenus en français. Les balises doivent utiliser des lettres minuscules avec des traits d\'union (-) pour connecter plusieurs mots'
 			},
 			'de': {
 				systemRole: 'Sie sind ein professioneller Assistent für die Generierung von Dokument-Metadaten. Bitte generieren Sie genaue und nützliche YAML-Format-Metadaten basierend auf dem Dokumentinhalt und den Template-Anforderungen, die der Benutzer bereitstellt.',
-				languageInstruction: 'Titel, Zusammenfassungen, Tags und andere Inhalte auf Deutsch generieren'
+				languageInstruction: 'Titel, Zusammenfassungen, Tags und andere Inhalte auf Deutsch generieren. Tags müssen Kleinbuchstaben mit Bindestrichen (-) verwenden, um mehrere Wörter zu verbinden'
 			},
 			'es': {
 				systemRole: 'Eres un asistente profesional de generación de metadatos de documentos. Por favor, genera metadatos en formato YAML precisos y útiles basados en el contenido del documento y los requisitos de plantilla proporcionados por el usuario.',
-				languageInstruction: 'Generar títulos, resúmenes, etiquetas y otros contenidos en español'
+				languageInstruction: 'Generar títulos, resúmenes, etiquetas y otros contenidos en español. Las etiquetas deben usar letras minúsculas con guiones (-) para conectar múltiples palabras'
 			},
 			'it': {
 				systemRole: 'Sei un assistente professionale per la generazione di metadati di documenti. Si prega di generare metadati in formato YAML accurati e utili basati sul contenuto del documento e sui requisiti del template forniti dall\'utente.',
-				languageInstruction: 'Generare titoli, riassunti, tag e altri contenuti in italiano'
+				languageInstruction: 'Generare titoli, riassunti, tag e altri contenuti in italiano. I tag devono usare lettere minuscole con trattini (-) per collegare più parole'
 			},
 			'ru': {
 				systemRole: 'Вы профессиональный помощник по генерации метаданных документов. Пожалуйста, создайте точные и полезные метаданные в формате YAML на основе содержания документа и требований шаблона, предоставленных пользователем.',
-				languageInstruction: 'Генерировать заголовки, резюме, теги и другой контент на русском языке'
+				languageInstruction: 'Генерировать заголовки, резюме, теги и другой контент на русском языке. Теги должны использовать строчные буквы с дефисами (-) для соединения нескольких слов'
 			}
 		};
 		
@@ -449,11 +451,78 @@ ${request.template.aiPrompt}`;
 			const currentDate = new Date().toISOString().split('T')[0];
 			cleanMetadata = cleanMetadata.replace(/\{\{date\}\}/g, currentDate);
 
+			// 格式化标签和标题以确保 Obsidian 兼容性
+			cleanMetadata = this.formatTagsForObsidian(cleanMetadata);
+			cleanMetadata = this.formatTitleForObsidian(cleanMetadata);
+
 			return cleanMetadata;
 
 		} catch (error) {
 			throw new Error(`Metadata format validation failed: ${error instanceof Error ? error.message : String(error)}`);
 		}
+	}
+
+	/**
+	 * 格式化标签以确保 Obsidian 兼容性
+	 */
+	private formatTagsForObsidian(metadata: string): string {
+		let result = metadata;
+		
+		// 处理 YAML 数组格式的标签 (tags: [])
+		result = result.replace(/tags:\s*\[([\s\S]*?)\]/gm, (match, tagsContent) => {
+			const formattedTagsContent = tagsContent.replace(/["']([^"'\n]*?)["']/g, (tagMatch: string, tagValue: string) => {
+				const formattedTag = this.formatSingleTag(tagValue);
+				return formattedTag ? `"${formattedTag}"` : tagMatch;
+			});
+			return `tags: [${formattedTagsContent}]`;
+		});
+		
+		// 处理 YAML 列表格式的标签 (tags: \n - item)
+		result = result.replace(/tags:\s*\n(\s*-\s*[^\n]*\n?)*/gm, (match) => {
+			const formattedMatch = match.replace(/(\s*-\s*)["']([^"'\n]+?)["'](\n?)/g, (tagMatch, prefix, tagValue, suffix) => {
+				const formattedTag = this.formatSingleTag(tagValue);
+				return formattedTag ? `${prefix}"${formattedTag}"${suffix}` : tagMatch;
+			});
+			return formattedMatch;
+		});
+		
+		return result;
+	}
+
+	/**
+	 * 格式化标题以确保 Obsidian 兼容性
+	 */
+	private formatTitleForObsidian(metadata: string): string {
+		return metadata.replace(/^title:\s*["']([^"'\n]+)["']?$/gm, (match, titleValue) => {
+			if (titleValue && titleValue.trim()) {
+				const formattedTitle = this.formatSingleTag(titleValue);
+				return `title: "${formattedTitle}"`;
+			}
+			return match;
+		});
+	}
+
+	/**
+	 * 格式化单个标签
+	 */
+	private formatSingleTag(tagValue: string): string {
+		if (!tagValue || !tagValue.trim()) {
+			return '';
+		}
+		
+		let formattedTag = tagValue.trim();
+		
+		// 转换为小写
+		formattedTag = formattedTag.toLowerCase();
+		
+		// 替换空格和其他分隔符为连字符
+		formattedTag = formattedTag
+			.replace(/[\s_]+/g, '-')  // 将空格和下划线替换为连字符
+			.replace(/[^\w\-\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/g, '-')  // 保留字母数字和中日韩字符，其他字符替换为连字符
+			.replace(/-+/g, '-')  // 将多个连续连字符替换为单个连字符
+			.replace(/^-|-$/g, '');  // 移除开头和结尾的连字符
+		
+		return formattedTag;
 	}
 
 	/**

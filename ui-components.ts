@@ -10,6 +10,7 @@ export class TemplateSelectModal extends Modal {
 	private onSelect: (template: MetadataTemplate) => void;
 	private onCancel?: () => void;
 	private keyboardHandler?: (e: KeyboardEvent) => void;
+	private selectedIndex: number = -1;
 
 	constructor(
 		app: App, 
@@ -21,6 +22,11 @@ export class TemplateSelectModal extends Modal {
 		this.templates = templates;
 		this.onSelect = onSelect;
 		this.onCancel = onCancel;
+		// 默认选择 general note 模板
+		this.selectedIndex = this.templates.findIndex(t => t.template.id === 'general-note');
+		if (this.selectedIndex === -1 && this.templates.length > 0) {
+			this.selectedIndex = 0; // 如果没找到 general note，选择第一个
+		}
 	}
 
 	onOpen() {
@@ -65,6 +71,11 @@ export class TemplateSelectModal extends Modal {
 			const { template, confidence } = templateOption;
 			const cardEl = listContainer.createDiv('template-card');
 			
+			// 添加选中状态样式
+			if (index === this.selectedIndex) {
+				cardEl.addClass('template-selected');
+			}
+			
 			// 模板图标和名称
 			const headerEl = cardEl.createDiv('template-header');
 			const iconEl = headerEl.createEl('div', { cls: 'template-icon' });
@@ -88,9 +99,18 @@ export class TemplateSelectModal extends Modal {
 					cls: 'recommended-badge'
 				});
 			}
+			
+			// 默认选中标识
+			if (index === this.selectedIndex) {
+				const selectedBadgeEl = cardEl.createEl('div', { 
+					text: 'Selected',
+					cls: 'selected-badge'
+				});
+			}
 
 			// 点击选择
 			cardEl.addEventListener('click', () => {
+				this.selectedIndex = index;
 				this.close();
 				this.onSelect(template);
 			});
@@ -127,6 +147,12 @@ export class TemplateSelectModal extends Modal {
 			} else if (e.key === '2' && templates[1]) {
 				this.close();
 				this.onSelect(templates[1].template);
+			} else if (e.key === 'Enter') {
+				// 回车键选择当前选中的模板
+				if (this.selectedIndex >= 0 && this.selectedIndex < templates.length) {
+					this.close();
+					this.onSelect(templates[this.selectedIndex].template);
+				}
 			} else if (e.key === 'Escape') {
 				this.close();
 				this.onCancel?.();
@@ -301,6 +327,26 @@ export class TemplateSelectModal extends Modal {
 			.template-card:hover .shortcut-number {
 				background: var(--text-accent);
 				color: white;
+			}
+			
+			.template-selected {
+				border-color: var(--text-accent) !important;
+				background: var(--background-secondary-alt) !important;
+				box-shadow: 0 0 0 2px var(--text-accent) !important;
+			}
+			
+			.selected-badge {
+				position: absolute;
+				top: 12px;
+				left: 12px;
+				background: var(--text-accent);
+				color: white;
+				font-size: 0.75em;
+				font-weight: 600;
+				padding: 4px 8px;
+				border-radius: 12px;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
 			}
 			
 			.modal-actions {

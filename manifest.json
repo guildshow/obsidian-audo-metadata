@@ -1,7 +1,7 @@
 {
 	"id": "auto-meta",
 	"name": "Auto Meta",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Supercharge your note organization with Auto Meta, an Obsidian plugin that leverages Large Language Models (LLMs) to automatically generate and manage metadata for your notes.",
 	"author": "guildshow",

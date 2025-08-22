@@ -10,17 +10,15 @@ export const BUILT_IN_TEMPLATES: MetadataTemplate[] = [
 date: "{{date}}"
 tags: []
 category: ""
-summary: ""
-keywords: []`,
+summary: ""`,
 		aiPrompt: `Please generate appropriate metadata based on the document content. Requirements:
-1. title: Generate a concise and clear title for the document
+1. title: Generate a concise and clear title for the document. IMPORTANT: Use lowercase letters and hyphens (-) to connect multiple words (e.g., "machine-learning-guide", "project-management-notes")
 2. date: Use current date ({{date}})
-3. tags: Generate 3-5 relevant tags based on content
+3. tags: Generate 3-5 relevant tags based on content. IMPORTANT: Tags must use lowercase letters and hyphens (-) to connect multiple words (e.g., "machine-learning", "project-management")
 4. category: Assign a main category for the document
 5. summary: Generate a summary within 50 words
-6. keywords: Extract 3-5 keywords
 
-Please ensure the generated content accurately reflects the document theme, and tags and keywords are specific and useful.`,
+Please ensure the generated content accurately reflects the document theme, and tags are specific and useful.`,
 		isBuiltIn: true,
 		createdAt: new Date(),
 		updatedAt: new Date()
@@ -46,7 +44,7 @@ next_meeting: ""`,
 4. participants: Extract attendees (if mentioned)
 5. duration: Estimate meeting duration (if information available)
 6. location: Extract meeting location (if available)
-7. tags: Generate relevant tags
+7. tags: Generate relevant tags. IMPORTANT: Tags must use lowercase letters and hyphens (-) to connect multiple words (e.g., "weekly-meeting", "project-planning")
 8. agenda_items: Extract main agenda items
 9. action_items: Extract action items and tasks
 10. next_meeting: Extract next meeting arrangements (if available)
