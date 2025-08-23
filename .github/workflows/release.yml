@@ -3,53 +3,70 @@ name: Release Obsidian Plugin
 on:
   push:
     tags:
-      - "*" # 监听所有 tag，例如 1.0.2 或 v1.0.2
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  release:
+    types: [published]
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Use Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install
+        run: npm ci
 
-      - name: Build plugin
+      - name: Build
         run: npm run build
 
-      - name: Extract version from tag
-        id: version
+      - name: Derive version from tag
+        id: ver
         run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          VERSION=${TAG#v} # 去掉前导 v
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            TAG="${{ github.event.release.tag_name }}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Update manifest.json version
+      - name: Update build/manifest.json version
         run: |
-          VERSION=${{ steps.version.outputs.version }}
-          echo "Setting version to $VERSION"
-          jq ".version = \"$VERSION\"" build/manifest.json > build/manifest.json.tmp
+          jq '.version = "${{ steps.ver.outputs.version }}"' build/manifest.json > build/manifest.json.tmp
           mv build/manifest.json.tmp build/manifest.json
 
-      - name: Create plugin.zip (optional)
+      - name: List build dir (debug)
+        run: ls -la build
+
+      - name: (optional) Zip bundle
         run: |
           cd build
-          zip -r ../plugin.zip manifest.json main.js styles.css || true
-          cd ..
+          zip -r ../plugin-${{ steps.ver.outputs.version }}.zip manifest.json main.js styles.css 2>/dev/null || true
+          cd -
 
-      - name: Upload Release Assets
+      - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: Release ${{ steps.ver.outputs.tag }}
           files: |
             build/main.js
             build/manifest.json
-            plugin.zip
+            plugin-${{ steps.ver.outputs.version }}.zip
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
