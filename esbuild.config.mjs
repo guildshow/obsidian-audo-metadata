@@ -52,6 +52,7 @@ if (prod) {
 	// Copy necessary files to build directory
 	copyFileSync('manifest.json', 'build/manifest.json');
 	copyFileSync('versions.json', 'build/versions.json');
+	copyFileSync('styles.css', 'build/styles.css');
 	
 	console.log('Build completed. Plugin files copied to build/ directory.');
 	process.exit(0);

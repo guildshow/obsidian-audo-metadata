@@ -66,6 +66,7 @@ jobs:
           files: |
             build/main.js
             build/manifest.json
+            build/styles.css
             plugin-${{ steps.ver.outputs.version }}.zip
           fail_on_unmatched_files: true
         env:

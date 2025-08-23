@@ -25,7 +25,6 @@ export default class AutoMetaPlugin extends Plugin {
 		this.addCommand({
 			id: 'ai-generate-metadata',
 			name: 'Generate metadata with AI',
-			hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 'm' }],
 			callback: () => {
 				this.metadataGenerator.generateForCurrentFile(true, this.settings.previewBeforeInsert);
 			}
@@ -35,7 +34,6 @@ export default class AutoMetaPlugin extends Plugin {
 		this.addCommand({
 			id: 'ai-select-template-generate',
 			name: 'Select template and generate metadata',
-			hotkeys: [{ modifiers: ['Ctrl', 'Shift'], key: 't' }],
 			callback: () => {
 				this.metadataGenerator.generateForCurrentFile(false, this.settings.previewBeforeInsert);
 			}
@@ -157,16 +155,16 @@ class AutoMetaSettingTab extends PluginSettingTab {
 			return dropdown.onChange(async (value) => {
 				if (value === 'custom') {
 					// Show custom input and focus on it
-					customInput.inputEl.style.display = 'block';
+					customInput.inputEl.classList.remove('custom-model-input');
 					customInput.inputEl.focus();
 				} else if (value) {
 					// Hide custom input and set preset model
-					customInput.inputEl.style.display = 'none';
+					customInput.inputEl.classList.add('custom-model-input');
 					this.plugin.settings.aiConfig.model = value;
 					await this.plugin.saveSettings();
 				} else {
 					// Show custom input if nothing selected
-					customInput.inputEl.style.display = 'block';
+					customInput.inputEl.classList.remove('custom-model-input');
 				}
 			});
 		});
@@ -183,7 +181,7 @@ class AutoMetaSettingTab extends PluginSettingTab {
 				
 			// Initially hide if preset model is selected
 			if (isPresetModel) {
-				text.inputEl.style.display = 'none';
+				text.inputEl.classList.add('custom-model-input');
 			}
 			
 			return text.onChange(async (value) => {

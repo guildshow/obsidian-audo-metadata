@@ -1,6 +1,6 @@
 {
 	"name": "auto-meta",
-	"version": "1.0.4",
+	"version": "1.0.7",
 	"description": "Automatically manage metadata for your notes",
 	"main": "build/main.js",
 	"scripts": {
