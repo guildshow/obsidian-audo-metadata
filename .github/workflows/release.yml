@@ -35,12 +35,14 @@ jobs:
         run: |
           VERSION=${{ steps.version.outputs.version }}
           echo "Setting version to $VERSION"
-          jq ".version = \"$VERSION\"" manifest.json > manifest.json.tmp
-          mv manifest.json.tmp manifest.json
+          jq ".version = \"$VERSION\"" build/manifest.json > build/manifest.json.tmp
+          mv build/manifest.json.tmp build/manifest.json
 
       - name: Create plugin.zip (optional)
         run: |
-          zip -r plugin.zip manifest.json main.js styles.css || true
+          cd build
+          zip -r ../plugin.zip manifest.json main.js styles.css || true
+          cd ..
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
@@ -48,5 +50,6 @@ jobs:
           files: |
             build/main.js
             build/manifest.json
+            plugin.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
